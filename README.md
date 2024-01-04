@@ -8,4 +8,6 @@ Dead parrot psychophysics experiments ported from psychophysics and video toolbo
 
 2. Each experiment in this repository is not meant to be complete or correct but merely a minimal example of dead parrots (read: experiments) that are available to those interested. Errors could creep in from the original code, the translation, or elsewhere. Service and support for each Parrot will be poor and/or frustrating.
 
-3. Please feel free to contribute or suggest experiments, especially pre-PTB3 experiments, that you believe would be useful.   
+3. Please feel free to contribute or suggest experiments, especially pre-PTB3 experiments, that you believe would be useful.
+
+4. "I wanted to be a lumberjack."    
