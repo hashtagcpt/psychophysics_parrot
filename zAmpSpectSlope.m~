@@ -1,0 +1,73 @@
+function zSpectSlope = zAmpSpectSlope(targIm, params)
+
+% function to calculate and return the slope (on log-log axes)
+% of the amplitude spectrum of a given image 
+% example: ampSpectSlope(rand(256), [1 1]);
+% user parameters   specify whether image is zero padded (uses image of twice
+%                   the source image size to minimise edge effects at wrapping point)
+%                   and whether amplitudes are averaged within each octave
+% params(1)== 1 - zero padded, amplitudes NOT averaged within octave
+% params(1)== 2 - NOT zero padded, amplitudes avereaged within octave
+% params(1)== 3 - zero padded, amplitudes averaged within octave
+% params(1)== anything else - NOT zero padded, amplitudes Not averaged within octave
+% params(2)== 1 plot data and fit to figure
+
+srcSize=size;
+imSize=srcSize;
+
+if params(1)==1                                                         % zero padded image
+	[X,Y]=meshgrid(-imSize(1):imSize(1)-1,-imSize(2):imSize(2)-1);                  % 2D matrix of twice the source image size
+	radDist=(X.^2+Y.^2).^0.5;                                           % radial distance from centre
+    radDist=fftshift(radDist);                                          % shift zero cpi to (1,1)
+    imageAmp=abs(fft2(targIm, imSize*2, imSize*2));                     % fft of image, padded with zeros to edge
+    fitParams=polyfit(log(radDist(2:end)), log(imageAmp(2:end)), 1);    % 1st order polynomial fit (y=mx+c) to log frequency vs log amplitude, without any averaging
+elseif params(1)==2                                                     % average all amplitudes within each octave
+	imRadius=round([imSize(1)/2 imSize(2)/2]);                                                  % not using zero padding
+	[X,Y]=meshgrid(-imRadius(1):-imRadius(1)+imSize(1)-1,-imRadius:-imRadius+imSize-1);          % 2D matrix of radial distances from centre
+	radDist=(X.^2+Y.^2).^0.5;                                           % radial distance from centre
+    radDist=fftshift(radDist);                                          % shift zero cpi to (1,1)
+    imAmp=abs(fft2(targIm));                                            % compute the amplitude spectrum (square for power)
+    nOctaves=ceil(log2(imSize));                                        % work out how many octaves there are in the image
+    for index=1:nOctaves                                        
+        fPeak(index)=2^(index-1);                                       % work through list of centre frequencies for each octave                                   
+        radOct=(radDist>(fPeak(index)/(2^0.5)) & radDist<=(fPeak(index)*(2^0.5)));% use a logical operator to identify all cells within octave - a matrix of 1's and 0's
+        octAmp=imAmp.*radOct;                                           % dot multiply amplitude spectrum by logical operator to zero out any components not in this octaveall amplitudes 
+        imageAmp(index)=sum(octAmp(:))/sum(radOct(:));                  % the average amplitude for the entire octave is the sum of all the component amplitudes divided by the total number of components
+    end   
+    fitParams=polyfit(log(fPeak(2:end)), log(imageAmp(2:end)), 1);      % 1st order polynomial fit (y=mx+c) to log frequency vs log amplitude, averaged within octaves
+elseif params(1)==3                                                     % as 2, but with zero padding
+	[X,Y]=meshgrid(-imSize:imSize-1,-imSize:imSize-1);
+	radDist=(X.^2+Y.^2).^0.5;
+    radDist=fftshift(radDist);
+    imAmp=abs(fft2(targIm, imSize*2, imSize*2));
+    nOctaves=floor(log2(imSize*2));
+    radOct=zeros(imSize*2);
+    for index=1:nOctaves
+        fPeak(index)=2^(index-1);
+        radOct=(radDist>(fPeak(index)/(2^0.5)) & radDist<=(fPeak(index)*(2^0.5)));
+        octAmp=imAmp.*radOct;
+        imageAmp(index)=sum(octAmp(:))/sum(radOct(:));
+    end   
+    fitParams=polyfit(log(fPeak(2:end)), log(imageAmp(2:end)), 1);
+else
+	imRadius=round(imSize/2);                                                  % not using zero padding
+	[X,Y]=meshgrid(-imRadius:-imRadius+imSize-1,-imRadius:-imRadius+imSize-1);
+	radDist=(X.^2+Y.^2).^0.5;
+    radDist=fftshift(radDist);
+    imageAmp=abs(fft2(targIm));
+    fitParams=polyfit(log(radDist(2:end)), log(imageAmp(2:end)), 1);
+end
+
+if params(2)==1                                                         % user wants a figure
+	if (params(1)==2 |params(1)==3)
+        fitLine=exp(fitParams(2)+fitParams(1)*log(fPeak));              % calculate fit line with fit parameters and octave distances and averaged amplitudes
+	    figLeg=sprintf('s=%3.3f', fitParams(1));
+        loglog(fPeak, imageAmp, 'bo', fPeak, fitLine, 'r-');xlabel('frequency');ylabel('amplitude');legend(figLeg, 1); % plot log-log graph
+    else
+       fitLine=exp(fitParams(2)+fitParams(1)*log(radDist(2:end)));      % calculate fit line with fit parameters and all radial distances and amplitudes
+	   figLeg=sprintf('s=%3.3f', fitParams(1));
+       loglog(radDist(2:end), imageAmp(2:end), 'bo', radDist(2:end), fitLine, 'r-');xlabel('frequency');ylabel('amplitude');legend(figLeg, 1); % plot log-log graph
+    end
+end
+
+spectSlope=fitParams(1);    % return slope

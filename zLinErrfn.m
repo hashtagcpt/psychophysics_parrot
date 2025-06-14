@@ -1,0 +1,1 @@
+function err = zLinErrfn( v, data )% LINERRFN  Error function minimized by linfit.m%% err = errfn( v, data )%% This function is called by linfit.m.  You shouldn't have to use it% directly.% find error for pointsv(1) = 0;err=sum( (data(2,:)-(v(2)*(data(1,:)-v(1)))).^2 );return

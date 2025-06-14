@@ -1,0 +1,1 @@
+function exitflag=waitforspace(snd);%function exitflag=waitforspace(snd);	if nargin > 0		sound(snd);	end	space_bar=32;	quit_key='Q';	response_key=0;		exitflag = 0;	flushevents('keyDown');	while response_key ~= space_bar & ~exitflag		response_key = GetChar;				if response_key == quit_key			exitflag = 1;		end	endreturn

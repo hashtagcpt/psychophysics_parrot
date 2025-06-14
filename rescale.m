@@ -1,0 +1,1 @@
+function output=rescale(input, mmax, mmin)% output=rescale(input, mmax, mmin)% Rescale an input matrix to an output matrix from nmin to nmax.%% U of  T Vision Lab (CPT)output = input.*(mmax-mmin)+mmin;

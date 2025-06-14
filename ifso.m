@@ -1,0 +1,1 @@
+function val = ifso( condition, val1, val2 )% IFSO  Same as C/C++ conditional operator ( C ? V1 : V2 ).%% val = ifso( condition, val1, val2 )if condition,	val=val1;else	val=val2;endreturn

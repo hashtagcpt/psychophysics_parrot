@@ -1,0 +1,1 @@
+function [in]=zQuantize(in,min,max,nbins);%function [out]=zQuantize(in,min,max,nbins);	vals=linspace(min,max,nbins);	[r,c]=size(in);	for counter=1:r*c		[minVal,whichBin]=min(abs(vals-in(counter)));		in(counter)=vals(whichBin);	endreturn;
